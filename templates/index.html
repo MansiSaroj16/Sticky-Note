@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Notes</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/lovepik-sticky-note-paper.png') }}"/>
+
+    <style>
+        /* CSS style for the app */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f2f2f2;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .header .logout-button {
+            background-color: #dc3545; 
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 10px;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+        .header .logout-button:hover {
+            background-color: #c82333;
+        }
+        .note-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .note {
+            width: calc(20% - 20px);
+            height: 300px;
+            border: 1px solid #ccc;
+            margin: 0 10px 30px 10px;
+            padding: 10px;
+            overflow: auto;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            
+            border-radius: 0rem 1.5rem 0rem 1.5rem;
+        }
+        .yellow { background-color: rgb(235, 235, 44); }
+        .red { background-color: rgb(230, 56, 56); }
+        .green { background-color: rgb(31, 241, 31); }
+        .blue { background-color: rgb(61, 61, 223); }
+        .purple { background-color: rgb(131, 14, 131); }
+        .pink { background-color: rgb(253, 109, 193); }
+
+        
+        .note button {
+            margin-top: auto; 
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .note .button-container {
+            display: flex;
+            justify-content: space-between; 
+            gap: 10px; 
+            margin-top: auto; 
+        }
+        .note .edit-button {
+            background-color: #0e0f0e;
+        }
+        .note .delete-button {
+            background-color: #141414; 
+        }
+        .note .edit-button:hover {
+            background-color: #645757;
+        }
+        .note .delete-button:hover {
+            background-color: #55484a;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sticky Notes App</h1>
+        {% if session.loggedin %}
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+        <h3>{{ 'Edit Note' if note_to_edit else 'Create a New Note' }}:</h3>
+        <form action="/add_note" method="post">
+            <input type="hidden" name="note_id" value="{{ note_to_edit.id if note_to_edit else '' }}">
+
+            
+            <input type="text" name="note_text" placeholder="Take a note..." style="color: rgb(7, 7, 7);" value="{{ note_to_edit.text if note_to_edit else '' }}" required>
+            <select name="note_color">
+                <option value="blue" {% if note_to_edit and note_to_edit.color == 'blue' %}selected{% endif %}>Blue</option>
+                <option value="pink" {% if note_to_edit and note_to_edit.color == 'pink' %}selected{% endif %}>Pink</option>
+                <option value="yellow" {% if note_to_edit and note_to_edit.color == 'yellow' %}selected{% endif %}>Yellow</option>
+                <option value="red" {% if note_to_edit and note_to_edit.color == 'red' %}selected{% endif %}>Red</option>
+                <option value="green" {% if note_to_edit and note_to_edit.color == 'green' %}selected{% endif %}>Green</option>
+                <option value="purple" {% if note_to_edit and note_to_edit.color == 'purple' %}selected{% endif %}>Purple</option>
+            </select>
+            <button type="submit">{{ 'Update Note' if note_to_edit else 'Add Note' }}</button>
+        </form>
+    </div>
+    <div class="note-container">
+        {% for note in notes %}
+        <div class="note {{ note.color }}">
+            <p>{{ note.text }}</p>
+            <div class="button-container">
+                <form action="/edit_note/{{ note.id }}" method="get">
+                    <button type="submit" class="edit-button">Edit</button>
+                </form>
+                <form action="/delete_note/{{ note.id }}" method="post" style="display:inline;">
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
